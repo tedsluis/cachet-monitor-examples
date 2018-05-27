@@ -1,0 +1,209 @@
+api:
+  # cachet url
+  url: http://localhost:8080/api/v1
+  # cachet api token
+  token: TEST2
+  insecure: false
+# https://golang.org/src/time/format.go#L57
+date_format: 02/01/2006 15:04:05 CET
+monitors:
+  # http monitor example
+  - name: OpenShift API F5
+    # test url
+    target: https://master:8443/healthz
+    # strict certificate checking for https
+    strict: false
+    # HTTP method
+    method: GET
+    
+    # set to update component (either component_id or metric_id are required)
+    component_id: 2
+    
+    # set to post to cachet metric (graph)
+    metrics:
+        response_time: [ 4, 5 ]
+
+    # set to post lag to cachet metric (graph) - obsolete
+    metric_id: 2
+
+    # launch script depending on event (failed or successful check)
+    #shellhook:
+    #    on_success: /fullpath/shellhook_onsuccess.sh
+    #    on_failure: /fullpath/shellhook_onfailure.sh
+
+    # custom templates (see readme for details)
+    template:
+      investigating:
+        subject: "{{ .Monitor.Name }} - {{ .SystemName }}"
+        message: "{{ .Monitor.Name }} check **failed** (server time: {{ .now }})\n\nThe OpenShift API has become unavailable!"
+      fixed:
+        subject: "The OpenShift API is available again."
+    
+    # seconds between checks
+    interval: 2
+    # seconds for timeout
+    timeout: 1
+
+    # resync component data every x check
+    resync: 60
+
+    # If % of downtime is over this threshold, open an incident
+    threshold: 50
+    threshold_critical: 80
+
+    # custom HTTP headers
+    #headers:
+    #  Authorization: Basic <hash>
+    # expected status code (either status code or body must be supplied)
+    expected_status_code: 200
+    # regex to match body
+    expected_body: "ok"
+  # http monitor example
+  - name: API master1
+    target: https://master1:8443/healthz
+    strict: false
+    method: GET
+    component_id: 1
+    #metrics:
+    #    response_time: [ 14, 15 ]
+    #metric_id: 12
+    template:
+      investigating:
+        subject: "{{ .Monitor.Name }} - {{ .SystemName }}"
+        message: "{{ .Monitor.Name }} check **failed** (server time: {{ .now }})\n\nThe API node1 is unavailable."
+      fixed:
+        subject: "The API master1 is available again."
+    interval: 2
+    timeout: 1
+    resync: 60
+    threshold: 50
+    threshold_critical: 80
+    expected_status_code: 200
+    expected_body: "ok"
+  - name: API master2
+    target: https://master2:8443/healthz
+    strict: false
+    method: GET
+    component_id: 3
+    #metrics:
+    #    response_time: [ 24, 25 ]
+    #metric_id: 22
+    template:
+      investigating:
+        subject: "{{ .Monitor.Name }} - {{ .SystemName }}"
+        message: "{{ .Monitor.Name }} check **failed** (server time: {{ .now }})\n\nThe API master2 is unavailable."
+      fixed:
+        subject: "The API master2 is available again."
+    interval: 2
+    timeout: 1
+    resync: 60
+    threshold: 50
+    threshold_critical: 80
+    expected_status_code: 200
+    expected_body: "ok"
+  - name: API master3
+    target: https://master3:8443/healthz
+    strict: false
+    method: GET
+    component_id: 4
+    #metrics:
+    #    response_time: [ 34, 35 ]
+    #metric_id: 32
+    template:
+      investigating:
+        subject: "{{ .Monitor.Name }} - {{ .SystemName }}"
+        message: "{{ .Monitor.Name }} check **failed** (server time: {{ .now }})\n\nThe API master3 is unavailable."
+      fixed:
+        subject: "The API master3 is available again."
+    interval: 2
+    timeout: 1
+    resync: 60
+    threshold: 50
+    threshold_critical: 80
+    expected_status_code: 200
+    expected_body: "ok"
+  - name: Registry
+    target: https://docker-registry.wildcard/healthz
+    strict: false
+    method: GET
+    component_id: 5
+    #metrics:
+    #    response_time: [ 44, 45 ]
+    #metric_id: 42
+    template:
+      investigating:
+        subject: "{{ .Monitor.Name }} - {{ .SystemName }}"
+        message: "{{ .Monitor.Name }} check **failed** (server time: {{ .now }})\n\nThe Docker registry is not available!"
+      fixed:
+        subject: "The Docker registry is available again."
+    interval: 2
+    timeout: 1
+    resync: 60
+    threshold: 50
+    threshold_critical: 80
+    expected_status_code: 200
+    expected_body: "^$"
+  - name: Router1
+    target: http://router1:1936/healthz
+    strict: true
+    method: GET
+    component_id: 6
+    #metrics:
+    #    response_time: [ 54, 55 ]
+    #metric_id: 52
+    template:
+      investigating:
+        subject: "{{ .Monitor.Name }} - {{ .SystemName }}"
+        message: "{{ .Monitor.Name }} check **failed** (server time: {{ .now }})\n\nRouter1 went down."
+      fixed:
+        subject: "Router1 has been come available again."
+    interval: 2
+    timeout: 1
+    resync: 60
+    threshold: 50
+    threshold_critical: 80
+    expected_status_code: 200
+    expected_body: "OK"
+  - name: Router2
+    target: http://router2:1936/healthz
+    strict: true
+    method: GET
+    component_id: 7
+    #metrics:
+    #    response_time: [ 64, 65 ]
+    #metric_id: 62
+    template:
+      investigating:
+        subject: "{{ .Monitor.Name }} - {{ .SystemName }}"
+        message: "{{ .Monitor.Name }} check **failed** (server time: {{ .now }})\n\nRouter2 went down."
+      fixed:
+        subject: "Router2 has been come available again."
+    interval: 2
+    timeout: 1
+    resync: 60
+    threshold: 50
+    threshold_critical: 80
+    expected_status_code: 200
+    expected_body: "OK"
+  - name: Metrics
+    target: https://hawkular-metrics.wildcard/hawkular/metrics/status
+    strict: false
+    method: GET
+    component_id: 8
+    #metrics:
+    #    response_time: [ 74, 75 ]
+    #metric_id: 72
+    template:
+      investigating:
+        subject: "{{ .Monitor.Name }} - {{ .SystemName }}"
+        message: "{{ .Monitor.Name }} check **failed** (server time: {{ .now }})\n\nMetrics is not available outside the cluster!"
+      fixed:
+        subject: "Metrics has been re-established."
+    interval: 2
+    timeout: 1
+    resync: 60
+    threshold: 50
+    threshold_critical: 80
+    expected_status_code: 200
+    expected_body: "STARTED"
+
