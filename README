@@ -1,0 +1,72 @@
+# Monitor OpenShift externaly using Cachet & Cachet monitor  
+  
+### Documentation
+https://docs.cachethq.io/reference
+https://github.com/CastawayLabs/cachet-monitor
+https://godoc.org/github.com/CastawayLabs/cachet-monitor
+  
+Follow the documentation and use the note below.   
+  
+### Configure services 
+Run the `main.yml` playbook to configure the services:
+```
+$ ansible-playbook main.yml
+```
+   
+### Status checks: 
+1 = Operational
+2 = Performance Issues
+3 = Partial Outage
+4 = Major Outage 
+  
+### set default app-key:
+```
+$ ./test.sh
+(echo update users SET api_key = \'TEST2\' WHERE username = \'admin\'; )|PGPASSWORD=postgres psql  -h ${DB_HOST} -U ${DB_USERNAME} -d ${DB_DATABASE}
+
+$ docker cp test.sh cachet:/
+$ docker -it cachet  /bin/bash /test.sh
+```
+   
+### Todo automatic make all groups and components
+```
+delete  from component_groups;
+ALTER SEQUENCE component_groups_id_seq RESTART WITH 1;
+insert into component_groups values ('1', 'Openshift API',null ,null, '0', '1');
+
+delete from components;
+ALTER SEQUENCE components_id_seq RESTART WITH 1;
+insert into components (name, description, status, group_id, link, "order") values ( 'Website','Website google.nl', 1, 1, ' ', 1);
+
+insert into components (name, description, status, group_id, link, \order) values ( 'Website','Website google.nl', 1, 1, ' ', 1);
+
+insert into components (name, description, status, group_id, link, "order") values ( 'API','API', 1, 1, ' ', 1);   
+```
+   
+### List component & metrics
+````
+curl -X GET -H "Content-Type: application/json;" -H "X-Cachet-Token: TOKEN" http://cachet-node:8080/api/v1/metrics | jq
+curl -X GET -H "Content-Type: application/json;" -H "X-Cachet-Token: TOKEN" http://cachet-node:8080/api/v1/components | jq
+````
+
+### Status URL
+http://cachet-node:8080
+http://cachet-node:8080/admin (default password admin)
+
+### Build openshift/cachet-monitor image
+````
+ocpauto@cachet-node ~/git/cachet/cachet-monitor $ oc create -n openshift -f buildconfig-cachet-monitor.yml
+ocpauto@cachet-node ~/git/cachet/cachet-monitor $ oc get is cachet-monitor
+NAME             DOCKER REPO                                                 TAGS      UPDATED
+cachet-monitor   docker-registry.default.svc:5000/openshift/cachet-monitor   latest    About an hour ago
+````
+
+### Create cachet-monitor in the `default` namespace
+Deploy cachet-monitor with OpenShift to poll end-point that are not exposed outside openShift.  
+````
+ocpauto@cachet-node ~/git/cachet/cachet-monitor/default $ oc create -n default -f configmap-cachet-monitor-config.yml
+configmap "cachet-monitor-config" created
+ocpauto@cachet-node ~/git/cachet/cachet-monitor/default $ oc create -n default -f cachet-monitor.yml
+deploymentconfig "cachet-monitor" created
+````
+
