@@ -1,0 +1,14 @@
+[Unit]
+Description=Postgres
+After=docker-latest.service
+Requires=docker-latest.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker rm -f postgres
+ExecStart=/usr/bin/docker run  --name postgres --rm  -v /var/lib/postgresql/data:/var/lib/postgresql/data -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres postgres:9.5
+ExecStop=/usr/bin/docker stop postgres
+Restart=always
+RestartSec=20
+
+[Install]
+WantedBy=multi-user.target
