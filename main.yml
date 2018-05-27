@@ -1,0 +1,42 @@
+---
+- hosts: 127.0.0.1
+  become: true
+  connection: local
+  tasks:
+  - name: make postgresql dir
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - /var/lib/postgresql
+      - /var/lib/postgresql/data
+  - name: copy docker systemd service files
+    copy:  
+      src: "{{ item }}"
+      dest: /etc/systemd/system/{{ item }}
+      owner: root
+      group: root
+      mode: 0644
+    with_items:
+      - docker-postgres.service
+      - docker-cachet.service
+      - cachet-monitor.service
+  - name: reload systemd
+    systemd: daemon_reload=yes
+  - name: enable service httpd and ensure it is not masked
+    systemd:
+      name: "{{ item }}"
+      enabled: yes
+      state: started
+    with_items:
+      - docker-postgres.service
+      - docker-cachet.service
+      - cachet-monitor.service
+  - name: wait if port 8080 is open 
+    wait_for:
+      port: 8080
+      delay: 10
+  - name: check cachet url ( 127.0.0.1:8080 ) 
+    uri:
+      url: http://127.0.0.1:8080
+...
