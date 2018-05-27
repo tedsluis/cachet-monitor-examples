@@ -1,0 +1,17 @@
+[Unit]
+Description=Cachet
+After=docker-latest.service
+Requires=docker-latest.service
+After=docker-postgres.service
+Requires=docker-postgres.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker rm -f cachet
+ExecStartPre=/bin/sleep 10
+ExecStart=/usr/bin/docker run --rm --name cachet --link postgres:postgres -e DB_DRIVER=pgsql -e DB_HOST=postgres -e DB_DATABASE=postgres -e DB_USERNAME=postgres -e DB_PASSWORD=postgres -e APP_KEY="base64:Xlwt9gnVWtwRR/xSMuGIZ71xV3jerFt3I8+BJ6HcxvQ=" -p 8080:8000 cachethq/docker:latest
+ExecStop=/usr/bin/docker stop cachet
+Restart=always
+RestartSec=20
+
+[Install]
+WantedBy=multi-user.target
