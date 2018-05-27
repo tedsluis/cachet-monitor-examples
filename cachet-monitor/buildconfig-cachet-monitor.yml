@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftNewApp
+  creationTimestamp: null
+  labels:
+    app: cachet-monitor
+  name: cachet-monitor
+spec:
+  failedBuildsHistoryLimit: 5
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: cachet-monitor:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    contextDir: cachet-monitor
+    git:
+      uri: https://github.com/tedsluis/cachet.git
+    sourceSecret:
+      name: gitconfig
+    type: Git
+  strategy:
+    dockerStrategy:
+      from:
+        kind: ImageStreamTag
+        name: ose:latest
+    type: Docker
+  successfulBuildsHistoryLimit: 5
+  triggers:
+  - github:
+      secret: SeGoPWatPKQUE3M-phjK
+    type: GitHub
+  - generic:
+      secret: 7vnaicFnCn62sH5rtV1B
+    type: Generic
+  - type: ConfigChange
+  - imageChange: {}
+    type: ImageChange
+status:
+  lastVersion: 0
