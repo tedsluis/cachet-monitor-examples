@@ -1,0 +1,20 @@
+[Unit]
+Description=Cachet Monitor
+After=syslog.target
+After=network.target
+After=postgresql.service
+After=docker-postgres.service
+After=docker-cachet.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/appl/ocpauto/git/cachet/cachet-monitor
+ExecStart=/appl/ocpauto/git/cachet/cachet-monitor/cachet-monitor-linux-amd64 -c /appl/ocpauto/git/cachet/cachet-monitor/cachet-monitor-config.yml
+Restart=always
+Environment=USER=root HOME=/root
+LimitNOFILE=64000
+
+[Install]
+WantedBy=multi-user.target
